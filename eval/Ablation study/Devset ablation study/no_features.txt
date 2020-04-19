@@ -1,0 +1,17 @@
+F1=0.598307
+Precision=0.598307
+Recall=0.598307
+F1_Appeal_to_Authority=0.2857142857142857
+F1_Appeal_to_fear-prejudice=0.34
+F1_Bandwagon,Reductio_ad_hitlerum=0.0
+F1_Black-and-White_Fallacy=0.16
+F1_Causal_Oversimplification=0.24
+F1_Doubt=0.5
+F1_Exaggeration,Minimisation=0.4827586206896551
+F1_Flag-Waving=0.7664670658682634
+F1_Loaded_Language=0.756393001345895
+F1_Name_Calling,Labeling=0.7428571428571428
+F1_Repetition=0.20618556701030924
+F1_Slogans=0.33333333333333337
+F1_Thought-terminating_Cliches=0.19047619047619047
+F1_Whataboutism,Straw_Men,Red_Herring=0.14634146341463414
