@@ -5,11 +5,10 @@ by
 Anders Friis Kaas, Barbara Plank and Viktor Torp Thomsen
 
 ## Introduction
-This GitHub repository contains all the code to recreate our solution and results for the SemEval 2020 Task 11 technique classification subtask. 
+This GitHub repository contains all the code to recreate our solution and results for the SemEval 2020 Task 11 technique classification subtask (https://propaganda.qcri.org/semeval2020-task11/index.html).
 
-
-## Guide
-
+## Replocation guide
+To be done
 
 ## License
 This work is licensed under a Creative Commons \
