@@ -9,9 +9,3 @@ This GitHub repository contains all the code to recreate our solution and result
 
 ## Replocation guide
 To be done
-
-## License
-This work is licensed under a Creative Commons \
-Attribution 4.0 International License.\
-License details:\
-http://creativecommons.org/licenses/by/4.0/
