@@ -13,6 +13,9 @@ This GitHub repository contains all the code to recreate our solution and result
 
 ## License
 This work is licensed under a Creative Commons 
+
 Attribution 4.0 International License.
+
 License details:
-url{http://creativecommons.org/licenses/by/4.0/}
+
+http://creativecommons.org/licenses/by/4.0/
