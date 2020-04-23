@@ -4,20 +4,23 @@ import transformers
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
-sys.path.insert(0, "./../utils")
+import sys
+import os
+sys.path.insert(0, os.getcwd() + "/utils/")
 from labels import label2id, id2label
 
 batch_size = int(input("Select batch size. Larger batch sizes may result in running out of memory. 8 is recommended."))
 
 gpu = torch.cuda.is_available()
 
-train_spans = pd.read_csv("./../datasets/processed_data/train_data/features/train_data.csv")
+train_spans = pd.read_csv(os.getcwd() + "/datasets/features/train_data.csv")
 
-train_spans["gold_label"] = train_spans["gold_label"].map(lambda x: id2label[x])
+train_spans["gold_label"] = train_spans["gold_label"].map(lambda x: label2id[x])
 
 tokenizer = transformers.BertTokenizer.from_pretrained("bert-large-uncased")
 
 tokenized_inputs = tokenizer.batch_encode_plus(train_spans["spans"], pad_to_max_length = True)["input_ids"]
+
 tokenized_attention = tokenizer.batch_encode_plus(train_spans["spans"], pad_to_max_length = True)["attention_mask"]
 
 tokenized_inputs = torch.tensor(tokenized_inputs)
@@ -73,7 +76,7 @@ for k, (train_i, dev_i) in enumerate(kfold.split(np.array(range(len(train_spans)
         cur_dev_f1 = evaluate(dev_i)
         print("Current F1 on dev set: {}".format(cur_dev_f1))
         if cur_dev_f1 < dev_f1:
-            torch.save(cur_best_model, "./state_dicts/BERT_large/BERT_large_dev_f1={}_k={}".format(dev_f1, k))
+            torch.save(cur_best_model, os.getcwd() +  "/state_dicts/BERT_large/BERT_large_dev_f1={}_k={}".format(dev_f1, k))
             break
         else:
             dev_f1 = cur_dev_f1
