@@ -1,0 +1,20 @@
+\begin{tabular}{lrrllll}
+\toprule
+  label & id & support & \% w. 1word & Avg \#words & Avg one\_word\_counter & Avg span\_sentence\_counter \\
+\midrule
+ Loaded\_Language & 8 & 2123 & 24.78 & 3.82 (4.0)) & 1.65 (2.0)) & 0.8 (1.0)) \\
+ Name\_Calling,Labeling & 9 & 1058 & 11.25 & 3.93 (3.0)) & 1.62 (2.0)) & 0.62 (1.0)) \\
+  Repetition & 10 & 621 & 43.64 & 2.81 (3.0)) & 6.92 (5.0)) & 1.35 (2.0)) \\
+  Doubt & 5 & 493 & 1.42 & 21.14 (16.0)) & 1.0 (1.0)) & 0.13 (0.0)) \\
+ Exaggeration,Minimisation & 6 & 466 & 6.22 & 7.44 (6.0)) & 0.97 (0.0)) & 0.63 (1.0)) \\
+ Appeal\_to\_fear-prejudice & 1 & 294 & 3.06 & 17.05 (13.0)) & 1.44 (1.0)) & 0.32 (0.0)) \\
+ Flag-Waving & 7 & 229 & 11.79 & 10.63 (12.0)) & 4.33 (3.0)) & 0.22 (1.0)) \\
+ Causal\_Oversimplification & 4 & 209 & 0.0 & 21.52 (13.0)) & nan (nan)) & 0.1 (0.0)) \\
+ Appeal\_to\_Authority & 0 & 144 & 0.0 & 23.2 (22.0)) & nan (nan)) & 0.22 (0.0)) \\
+  Slogans & 11 & 129 & 6.2 & 4.33 (3.0)) & 1.25 (2.0)) & 0.23 (1.0)) \\
+ Whataboutism,Straw\_Men,Red\_Herring & 13 & 108 & 3.7 & 16.5 (11.0)) & 2.25 (1.0)) & 0.12 (0.0)) \\
+ Black-and-White\_Fallacy & 3 & 107 & 0.0 & 18.71 (13.0)) & nan (nan)) & 0.15 (0.0)) \\
+ Thought-terminating\_Cliches & 12 & 76 & 1.32 & 6.13 (4.0)) & 0.0 (0.0)) & 0.27 (0.0)) \\
+ Bandwagon,Reductio\_ad\_hitlerum & 2 & 72 & 0.0 & 16.44 (12.0)) & nan (nan)) & 0.1 (0.0)) \\
+\bottomrule
+\end{tabular}
