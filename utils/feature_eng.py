@@ -1,25 +1,20 @@
+import os
+import time
+import re
 import spacy
 import pandas as pd
 import numpy as np
-import re
 from tqdm import tqdm
-nlp = spacy.load('en')
 from nltk.stem import PorterStemmer 
+
 from pre_processor import PreProcessor
+from data_loader import DataLoader
+from data_writer import DataWriter
+from pre_processor import PreProcessor
+from labels import label2id, id2label
+# from feature_eng import GetFeatures
 
-
-
-import spacy
-import pandas as pd
-import numpy as np
-import re
-from tqdm import tqdm
 nlp = spacy.load('en')
-from nltk.stem import PorterStemmer 
-from pre_processor import PreProcessor
-
-
-
 
 class GetFeatures:
     def __init__ (self, df, col):
@@ -209,3 +204,151 @@ class GetFeatures:
         return self.df
 
 
+# Load and transform articles
+loader = DataLoader()
+writer = DataWriter()
+preproc = PreProcessor()
+
+print("""###################################################################
+# Load data and create features                                   #
+###################################################################""")
+
+print()
+print("Loading train data")
+train_spans = loader.read_spans("./datasets/train-task2-TC.labels")
+train_articles = loader.read_articles("./datasets/train-articles")
+print("     Done loading train data")
+print("Loading test data")
+dev_spans = loader.read_spans("./datasets/dev-task-TC-template.out")
+dev_articles = loader.read_articles("./datasets/dev-articles")
+print("     Done loading test data")
+
+test_spans = loader.read_spans("./datasets/test/test-task-TC-template.out")
+test_articles = loader.read_articles("./datasets/test/test-articles")
+print("     Done loading test data")
+
+print("Cleaning data")
+train_df = preproc.get_data(train_spans, train_articles)
+train_df["gold_label_id"] = train_df["gold_label"].map(lambda x: label2id[x])
+dev_df = preproc.get_data(dev_spans, dev_articles)
+test_df = preproc.get_data(test_spans, test_articles)
+print("     Done cleaning data")
+print()
+
+# create file structure for features
+if not os.path.exists('./datasets/processed_data'):
+    os.makedirs('./datasets/processed_data')
+    os.makedirs('./datasets/processed_data/train_data')
+    os.makedirs('./datasets/processed_data/dev_data')
+    os.makedirs('./datasets/processed_data/test_data')
+    os.makedirs('./datasets/processed_data/train_data/features')
+    os.makedirs('./datasets/processed_data/dev_data/features')
+    os.makedirs('./datasets/processed_data/test_data/features')
+
+# Get train features
+if os.path.isfile('./datasets/processed_data/train_data/features/train_data.csv'):
+    print("Loading train features")
+    train_df = pd.read_csv("./datasets/processed_data/train_data/features/train_data.csv")
+    print("     Done loading train features")
+else:
+    print("Creating train features")
+    start_time = time.time()
+    gf = GetFeatures(train_df, "spans")
+    train_df = gf.get_features(return_pos=True, 
+                                return_dep=False, 
+                                return_counts=True, 
+                                return_oneword_counts=True, 
+                                return_sentence_repetition_counts=True, 
+                                return_bows=True, 
+                                return_resemble_factor=True,
+                                return_span_sent_count=True,
+                                train_articles=train_articles, 
+                                bow_col="pos_tags", 
+                                normalized=True)
+    end_time = time.time()
+    print("     Done creating train features")
+    print("Time to create train features:", end_time - start_time)
+    writer.save_df(train_df, "./datasets/processed_data/train_data/features/train_data.csv")
+print()
+# Get dev features
+if os.path.isfile('./datasets/processed_data/dev_data/features/dev_data.csv'):
+    print("Loading dev features")
+    dev_df = pd.read_csv("./datasets/processed_data/dev_data/features/dev_data.csv")
+    print("     Done loading dev features")
+else:
+    print("Creating dev features")
+    start_time = time.time()
+    gf = GetFeatures(dev_df, "spans")
+    dev_df = gf.get_features(return_pos=True, 
+                                return_dep=False, 
+                                return_counts=True, 
+                                return_oneword_counts=True, 
+                                return_sentence_repetition_counts=True, 
+                                return_bows=True, 
+                                return_resemble_factor=True,
+                                return_span_sent_count=True,
+                                train_articles=dev_articles, 
+                                bow_col="pos_tags", 
+                                normalized=True)
+    end_time = time.time()
+    print("     Done creating dev features")
+    print("Time to create dev features:", end_time - start_time)
+    writer.save_df(dev_df, "./datasets/processed_data/dev_data/features/dev_data.csv")
+    print()
+
+# Get test features
+if os.path.isfile('./datasets/processed_data/test_data/features/test_data.csv'):
+    print("Loading test features")
+    test_df = pd.read_csv("./datasets/processed_data/test_data/features/test_data.csv")
+    print("     Done loading test features")
+else:
+    print("Creating test features")
+    start_time = time.time()
+    gf = GetFeatures(test_df, "spans")
+    test_df = gf.get_features(return_pos=True, 
+                                return_dep=False, 
+                                return_counts=True, 
+                                return_oneword_counts=True, 
+                                return_sentence_repetition_counts=True, 
+                                return_bows=True, 
+                                return_resemble_factor=True,
+                                return_span_sent_count=True,
+                                train_articles=test_articles, 
+                                bow_col="pos_tags", 
+                                normalized=True)
+    end_time = time.time()
+    print("     Done creating test features")
+    print("Time to create test features:", end_time - start_time)
+    writer.save_df(test_df, "./datasets/processed_data/test_data/features/test_data.csv")
+print()
+
+print("creating EDA visualias")
+gold_labels = list(set(train_df["gold_label"]))
+num_occurences = [len(train_df[train_df["gold_label"]==label]) for label in gold_labels]
+sort_idx = np.argsort(num_occurences)
+
+overview_df = pd.DataFrame({"label": np.array(gold_labels)[sort_idx], "support":np.array(num_occurences)[sort_idx]})
+
+overview_df["% w. 1word"] = overview_df["label"].apply(lambda label: (len(train_df[(train_df["gold_label"]==label) & (train_df["span_word_length"] == 1)])/len(train_df[(train_df["gold_label"]==label)]))*100,1)
+overview_df["Avg #words"] = overview_df["label"].apply(lambda label: np.mean(train_df[train_df["gold_label"]==label]["span_word_length"]),1)
+# overview_df["median #words"] = overview_df["label"].apply(lambda label: np.median(train_df[train_df["gold_label"]==label]["span_word_length"]),1)
+overview_df["std #words"] = overview_df["label"].apply(lambda label: np.std(train_df[train_df["gold_label"]==label]["span_word_length"]),1)
+
+overview_df["Avg one_word_counter"] = overview_df["label"].apply(lambda label: np.mean(train_df[(train_df["gold_label"]==label) & (train_df["span_word_length"]==1)]["article_one_word_counter"]),1)
+overview_df["std one_word_counter"] = overview_df["label"].apply(lambda label: np.std(train_df[(train_df["gold_label"]==label) & (train_df["span_word_length"]==1)]["article_one_word_counter"]),1)
+
+overview_df["Avg span_sentence_counter"] = overview_df["label"].apply(lambda label: np.mean(train_df[(train_df["gold_label"]==label) & (train_df["span_word_length"]>1)]["article_span_sentence_counter"]),1)
+overview_df["std span_sentence_counter"] = overview_df["label"].apply(lambda label: np.std(train_df[(train_df["gold_label"]==label) & (train_df["span_word_length"]>1)]["article_span_sentence_counter"]),1)
+
+test = overview_df[["label", "support"]]
+o_df = overview_df.set_index("label")
+test["% w. 1word"] = test["label"].apply(lambda x: "{}".format(round(o_df.loc[x, "% w. 1word"], 2)))
+test["Avg #words"] = test["label"].apply(lambda x: "{} ({}))".format(round(o_df.loc[x, "Avg #words"], 2), round(o_df.loc[x, "std #words"]), 2))
+test["Avg one_word_counter"] = test["label"].apply(lambda x: "{} ({}))".format(round(o_df.loc[x, "Avg one_word_counter"], 2), round(o_df.loc[x, "std one_word_counter"]), 2))
+test["Avg span_sentence_counter"] = test["label"].apply(lambda x: "{} ({}))".format(round(o_df.loc[x, "Avg span_sentence_counter"], 2), round(o_df.loc[x, "std span_sentence_counter"]), 2))
+
+test["id"] = test["label"].apply(lambda x: label2id[x])
+cols = ["label","id","support", "% w. 1word", "Avg #words","Avg one_word_counter", "Avg span_sentence_counter"]
+
+with open("data_analysis.txt", "w") as fp:
+    fp.write(test[cols].sort_values("support", ascending=False).to_latex(index=False).replace("   "," ").replace("  "," ").replace("  "," ").replace("  "," "))
