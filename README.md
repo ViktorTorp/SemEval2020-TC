@@ -8,7 +8,7 @@ Anders Friis Kaas, Barbara Plank and Viktor Torp Thomsen
 This GitHub repository contains all the code to recreate our solution and results for the SemEval 2020 Task 11 technique classification subtask (https://propaganda.qcri.org/semeval2020-task11/index.html).
 
 ## Replication guide
-When the data the data is placed in the datasets folder, as specified in the folders README, run the following command.
+When the training data and development data is placed in the datasets folder, as specified in the folders README, run the following command:
 
 ```bash
 $ bash main
