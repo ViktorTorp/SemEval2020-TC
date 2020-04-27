@@ -3,12 +3,12 @@ import pandas as pd
 import transformers
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
-from tqdm import tqdm
 from sklearn.metrics import f1_score
+from tqdm import tqdm
 import os
 import sys
 
-print("-------------------- Now writing development logits --------------------")
+print("-------------------- Now writing test logits --------------------")
 
 batch_size = int(sys.argv[1])
 
@@ -30,10 +30,10 @@ if gpu:
 else:
     BertModel.load_state_dict(torch.load(model_paths[0], map_location=torch.device("cpu")))
 
-dev_df = pd.read_csv("./datasets/processed_data/dev_data/features/dev_data.csv", sep = ",")
+test_df = pd.read_csv("./datasets/processed_data/test_data/features/test_data.csv", sep = ",")
 
-tokenized_inputs = tokenizer.batch_encode_plus(dev_df["spans"], pad_to_max_length = True)["input_ids"]
-tokenized_attention = tokenizer.batch_encode_plus(dev_df["spans"], pad_to_max_length = True)["attention_mask"]
+tokenized_inputs = tokenizer.batch_encode_plus(test_df["spans"], pad_to_max_length = True)["input_ids"]
+tokenized_attention = tokenizer.batch_encode_plus(test_df["spans"], pad_to_max_length = True)["attention_mask"]
 tokenized_inputs = torch.tensor(tokenized_inputs)
 tokenized_attention = torch.tensor(tokenized_attention)
 
@@ -42,27 +42,26 @@ index_tracking = []
 
 batch_size = 8
 
-dev_logits = []
+test_logits = []
 
-dev_data = [tokenized_inputs, tokenized_attention]
+test_data = [tokenized_inputs, tokenized_attention]
 with tqdm(total=len(tokenized_inputs) / batch_size) as pbar:
     for i in range(0, len(tokenized_inputs), batch_size):
 
         if gpu:
-            current_batch = [x[i:i+batch_size].cuda() for x in dev_data]
+            current_batch = [x[i:i+batch_size].cuda() for x in test_data]
         else:
-            current_batch = [x[i:i+batch_size] for x in dev_data]
+            current_batch = [x[i:i+batch_size] for x in test_data]
 
         if gpu:
-            dev_logits.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach().cpu())
+            test_logits.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach().cpu())
         else:
-            dev_logits.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach())
+            test_logits.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach())
         pbar.update(1)
 
+logits.append(torch.cat(test_logits))
 
-logits.append(torch.cat(dev_logits))
-
-with open("./datasets/logits/BERT_large_dev_logits.csv", "w") as outfile:
+with open("./datasets/logits/BERT_large_test_logits.csv", "w") as outfile:
   for _, logit in enumerate(torch.cat(logits).numpy()):
       for i, n in enumerate(logit):
         outfile.write(str(n))

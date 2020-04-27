@@ -4,16 +4,20 @@ import transformers
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import f1_score
+from tqdm import tqdm
 import sys
 import os
 sys.path.insert(0, os.getcwd() + "/utils/")
 from labels import label2id, id2label
 
-batch_size = int(input("Select batch size. Larger batch sizes may result in running out of memory. 8 is recommended."))
+
+print("-------------------- Now fine-tuning BERT --------------------")
+
+batch_size = int(sys.argv[1])
 
 gpu = torch.cuda.is_available()
 
-train_spans = pd.read_csv(os.getcwd() + "/datasets/features/train_data.csv")
+train_spans = pd.read_csv("./datasets/processed_data/train_data/features/train_data.csv")
 
 train_spans["gold_label"] = train_spans["gold_label"].map(lambda x: label2id[x])
 
@@ -38,25 +42,28 @@ def evaluate(dev_i):
     BertModel.eval()
 
     dev_preds = []
+    with tqdm(total=len(dev_inputs) / batch_size) as pbar:
+        for i in range(0, len(dev_inputs), batch_size):
 
-    for i in range(0, len(dev_inputs), batch_size):
-        print("{} %".format(round(i*100 / len(dev_inputs), 2)))
+            if gpu:
+                current_batch = [x[i:i+batch_size].cuda() for x in dev_data]
+            else:
+                current_batch = [x[i:i+batch_size] for x in dev_data]
 
-        if gpu:
-            current_batch = [x[i:i+batch_size].cuda() for x in dev_data]
-        else:
-            current_batch = [x[i:i+batch_size] for x in dev_data]
-
-        if gpu:
-            dev_preds.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach().cpu())
-        else:
-            dev_preds.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach())
+            if gpu:
+                dev_preds.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach().cpu())
+            else:
+                dev_preds.append(BertModel.forward(current_batch[0], current_batch[1])[0].detach())
+            pbar.update(1)
 
     dev_preds = np.array(torch.argmax(torch.cat(dev_preds), dim = 1))
 
     return(f1_score(dev_labels, dev_preds, average = "micro"))
 
 for k, (train_i, dev_i) in enumerate(kfold.split(np.array(range(len(train_spans))), train_spans["gold_label"])):
+    if str(k) in [file[-1] for file in os.listdir("./models/state_dicts")]:
+        continue
+
 
     print("Currently on fold {}".format(k))
     BertModel = transformers.BertForSequenceClassification.from_pretrained("bert-large-uncased", num_labels = 14)
@@ -76,7 +83,7 @@ for k, (train_i, dev_i) in enumerate(kfold.split(np.array(range(len(train_spans)
         cur_dev_f1 = evaluate(dev_i)
         print("Current F1 on dev set: {}".format(cur_dev_f1))
         if cur_dev_f1 < dev_f1:
-            torch.save(cur_best_model, os.getcwd() +  "/state_dicts/BERT_large/BERT_large_dev_f1={}_k={}".format(dev_f1, k))
+            torch.save(cur_best_model, "./models/state_dicts/BERT_large_dev_f1={}_k={}".format(dev_f1, k))
             break
         else:
             dev_f1 = cur_dev_f1
