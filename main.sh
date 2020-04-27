@@ -1,5 +1,7 @@
 # Upgrade/required libraries
-pip install  -U -r requirements.txt
+pip install -r requirements.txt
+python -m spacy download en
+
 
 # Load data, create features and save data-analysis visuals
 python ./utils/feature_eng.py
