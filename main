@@ -1,5 +1,0 @@
-# Upgrade/required libraries
-pip install  -U -r requirements.txt
-
-# Load data, create features and save data-analysis visuals
-python ./utils/feature_eng.py
