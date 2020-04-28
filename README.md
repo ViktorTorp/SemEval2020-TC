@@ -1,4 +1,4 @@
-# DiSaster at SemEval-2020 Task 11
+# Team DiSaster at SemEval-2020 Task 11
 ## Combining BERT and hand-crafted features for Identifying Propaganda Techniques in News Media
 
 by 
