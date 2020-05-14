@@ -41,3 +41,7 @@ fi
 
 #Train ensemble and make predictions
 python ./models/train_ensemble.py
+
+
+# Create conf matrix
+python ./utils/conf_matrix.py
