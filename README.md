@@ -17,7 +17,7 @@ $ bash main.sh
 You can change the batch size for the BERT-large model in the main script by changing the value of the BATCH_SIZE variable.
 
 
-## Description of features
+## Description of features from GetFeatures 
 
 | Feature method  | Description |
 |-----------------|-------------|
